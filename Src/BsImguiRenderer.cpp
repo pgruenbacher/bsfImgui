@@ -80,10 +80,8 @@ HTexture createDefaultFonts()
 }
 
 HMaterial defaultImguiMaterial() {
-	// assume that the plugin is a submodule of the bsf framework under
-	// bsf/Source/Plugins/bsfImgui a better way to access the data will likely
-	// come up as more plugins are adopted in the framework.
-	Path imguipath = Path(RAW_APP_ROOT) + Path("Source/Plugins/bsfImgui/Data/Shader/imgui.bsl");
+    // the CURRENT_SOURCE_DIR should be defined by cmake
+    Path imguiPath = Path(CURRENT_SOURCE_DIR) + Path("Data/Shader/imgui.bsl");
 	// originally the plugin was using a shader in the builtin shaders directory.
 	// Path imguiPath = BuiltinResources::instance().getRawShaderFolder().append("Imgui.bsl");
 	HShader shader = gImporter().import<Shader>(imguiPath);

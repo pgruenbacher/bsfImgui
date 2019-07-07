@@ -17,4 +17,7 @@ target_include_directories(bsfImgui PUBLIC
 	ThirdParty/ImGuizmo
 )
 
+# until more standard way for plugins to register their assets
+target_compile_definitions(bsfImgui PUBLIC -DCURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
 target_link_libraries(bsfImgui bsf)
