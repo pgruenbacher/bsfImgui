@@ -234,7 +234,7 @@ void ImguiRendererExtension::renderDrawData(ImDrawData* draw_data,
                     cmd_list->VtxBuffer.Data);
 
     // assert that imgui index type is 16 bit or 2 bytes.
-    static_assert(sizeof(ImDrawIdx) == 2);
+    static_assert(sizeof(ImDrawIdx) == 2, "Confirm ImDrawIdx is IT_16BIT type");
     INDEX_BUFFER_DESC indexDesc;
     indexDesc.indexType = IT_16BIT;
     indexDesc.numIndices = cmd_list->IdxBuffer.Size;

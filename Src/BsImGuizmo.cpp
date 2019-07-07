@@ -16,7 +16,7 @@ void manipulateMatrix(Matrix4& matrix, const Matrix4& proj, const Matrix4& view,
   // unfortunately there's no easy way to access the private float array of the
   // matrices, but we can safeuly assume as of July 2019 that the matrix4x4 is a
   // float[4][4] so we'll just cast.
-  static_assert(sizeof(float[4][4]) == sizeof(Matrix4));
+  static_assert(sizeof(float[4][4]) == sizeof(Matrix4), "Confirm bs::Matrix4 is float[4][4] size");
 
   // imguizmo and bsf are tranposed...
   Matrix4 transView = view.transpose();
