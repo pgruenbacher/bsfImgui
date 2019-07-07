@@ -89,4 +89,4 @@ void EditTransform(Transform& transform, const SPtr<Camera> camera) {
   transform = Transform(trans, rotation, scale);
 }
 
-}  // namespace bs::ct
+}  // namespace bs

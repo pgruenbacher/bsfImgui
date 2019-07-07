@@ -33,4 +33,4 @@ void EditTransform(Transform& transform, const SPtr<Camera> camera);
  */
 void ManipulateTransform(Transform& transform, const SPtr<Camera> camera);
 
-}  // namespace bs::ct
+}  // namespace bs

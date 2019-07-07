@@ -23,15 +23,13 @@ HMaterial defaultImguiMaterial() ;
 /* call demo imgui windows */
 void demoImguiUI();
 
-}   // namespace bs
-
-namespace bs::ct {
+namespace ct {
 
 class ImguiRendererExtension : public RendererExtension {
   Mutex mImguiRenderMutex;
   SPtr<GpuParamBlockBuffer> gBuffer;
-  SPtr<VertexDeclaration> gVertexDecl;
-  HMaterial gMaterial;
+  SPtr<VertexDeclaration> mVertexDecl;
+  HMaterial mMaterial;
   ImDrawData mCopiedDrawData;
 
  public:
@@ -54,4 +52,5 @@ class ImguiRendererExtension : public RendererExtension {
   void renderDrawData(ImDrawData* draw_data, const ct::Camera& camera);
 };
 
-}  // namespace bs::ct
+}  // namespace ct
+}  // namespace bs

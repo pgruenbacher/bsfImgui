@@ -91,9 +91,7 @@ HMaterial defaultImguiMaterial() {
 	return material;
 }
 
-}  // namespace bs
-
-namespace bs::ct {
+namespace ct {
 
 BS_PARAM_BLOCK_BEGIN(ImguiParamBlockDef)
 BS_PARAM_BLOCK_ENTRY(float, gInvViewportWidth)
@@ -111,13 +109,13 @@ ImguiRendererExtension::ImguiRendererExtension()
   vertexDeclDesc->addVertElem(VET_FLOAT2, VES_POSITION);
   vertexDeclDesc->addVertElem(VET_FLOAT2, VES_TEXCOORD);
   vertexDeclDesc->addVertElem(VET_COLOR, VES_COLOR);
-  gVertexDecl = VertexDeclaration::create(vertexDeclDesc);
+  mVertexDecl = VertexDeclaration::create(vertexDeclDesc);
   assert(vertexDeclDesc->getVertexStride() == sizeof(ImDrawVert));
 }
 // ... other extension code
 
 void ImguiRendererExtension::initialize(const Any& data) {
-  gMaterial = any_cast<HMaterial>(data);
+  mMaterial = any_cast<HMaterial>(data);
 }
 
 void ImguiRendererExtension::destroy() {
@@ -127,7 +125,7 @@ bool ImguiRendererExtension::check(const ct::Camera& camera) { return true; }
 
 void ImguiRendererExtension::render(const ct::Camera& camera) {
 
-  assert(gMaterial.isLoaded());
+  assert(mMaterial.isLoaded());
   // lock the renderer so that when we are writing out the draw data, it is
   // not attempting to render at the same time.
   mImguiRenderMutex.lock();
@@ -182,18 +180,18 @@ void ImguiRendererExtension::setupRenderState(const ct::Camera& camera,
   gBuffer->flushToGPU();
 
   UINT32 passIdx = 0;
-  UINT32 techniqueIdx = gMaterial->getDefaultTechnique();
+  UINT32 techniqueIdx = mMaterial->getDefaultTechnique();
 
   SPtr<GpuParamsSet> paramSet =
-      gMaterial->getCore()->createParamsSet(techniqueIdx);
+      mMaterial->getCore()->createParamsSet(techniqueIdx);
   auto mParamBufferIdx = paramSet->getParamBlockBufferIndex("GUIParams");
   // confirm that invalid param buffer indices are (UINT32-1)
   assert(paramSet->getParamBlockBufferIndex("NoParamsTest") == (UINT32)-1);
   // confirm that buffer index is valid
   assert(mParamBufferIdx != (UINT32)-1);
-  gMaterial->getCore()->updateParamsSet(paramSet);
+  mMaterial->getCore()->updateParamsSet(paramSet);
   paramSet->setParamBlockBuffer(mParamBufferIdx, gBuffer, false);
-  gRendererUtility().setPass(gMaterial->getCore(), passIdx, techniqueIdx);
+  gRendererUtility().setPass(mMaterial->getCore(), passIdx, techniqueIdx);
   gRendererUtility().setPassParams(paramSet);
 }
 
@@ -250,7 +248,7 @@ void ImguiRendererExtension::renderDrawData(ImDrawData* draw_data,
     /*----------  Bind the vertex and index buffers  ----------*/
     UINT32 numBuffers = 1;
     renderAPI.setVertexBuffers(0, &vbuf, numBuffers);
-    renderAPI.setVertexDeclaration(gVertexDecl);
+    renderAPI.setVertexDeclaration(mVertexDecl);
     renderAPI.setIndexBuffer(ibuf);
     renderAPI.setDrawOperation(DOT_TRIANGLE_LIST);
 
@@ -297,4 +295,5 @@ void ImguiRendererExtension::renderDrawData(ImDrawData* draw_data,
   }
 }
 
-}  // namespace bs::ct
+}  // namespace ct
+}  // namespace bs
