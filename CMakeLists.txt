@@ -18,8 +18,7 @@ target_include_directories(bsfImgui PUBLIC
 )
 
 # disable default osx/win32 functions (we use bsf inputs only)
-target_compile_definitions(bsfImgui -DIMGUI_DISABLE_OSX_FUNCTIONS -DIMGUI_DISABLE_WIN32_FUNCTIONS)
-
+target_compile_definitions(bsfImgui PUBLIC -DIMGUI_DISABLE_OSX_FUNCTIONS -DIMGUI_DISABLE_WIN32_FUNCTIONS)
 # until more standard way for plugins to register their assets
 target_compile_definitions(bsfImgui PUBLIC -DCURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
