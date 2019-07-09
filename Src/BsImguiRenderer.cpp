@@ -5,21 +5,17 @@
 #include "RenderAPI/BsBlendState.h"
 #include "Renderer/BsParamBlocks.h"
 #include "Debug/BsBitmapWriter.h"
-// #include "Mesh/BsMesh.h"
 #include "Renderer/BsCamera.h"
 #include "RenderAPI/BsVertexDataDesc.h"
 #include "Mesh/BsMeshHeap.h"
-// #include "Mesh/BsTransientMesh.h"
-#include "Material/BsMaterial.h"
 #include "RenderAPI/BsIndexBuffer.h"
 #include "RenderAPI/BsVertexBuffer.h"
 #include "Importer/BsImporter.h"
-#include "Material/BsGpuParamsSet.h"
+#include "Material/BsPass.h"
 #include "Material/BsShader.h"
 #include "Resources/BsBuiltinResources.h"
 #include "FileSystem/BsFileSystem.h"
 #include "FileSystem/BsDataStream.h"
-#include "Renderer/BsRendererUtility.h"
 #include "Renderer/BsRendererExtension.h"
 #include "BsEngineConfig.h"
 
@@ -79,16 +75,11 @@ HTexture createDefaultFonts()
   return texture;
 }
 
-HMaterial defaultImguiMaterial() {
-    // the CURRENT_SOURCE_DIR should be defined by cmake
-    Path imguiPath = Path(CURRENT_SOURCE_DIR) + Path("Data/Shader/imgui.bsl");
-	// originally the plugin was using a shader in the builtin shaders directory.
-	// Path imguiPath = BuiltinResources::instance().getRawShaderFolder().append("Imgui.bsl");
+
+HShader defaultImguiShader() {
+	Path imguiPath = BuiltinResources::instance().getRawShaderFolder().append("Imgui.bsl");
 	HShader shader = gImporter().import<Shader>(imguiPath);
-	HMaterial material = Material::create(shader);
-	HTexture texture = createDefaultFonts();
-	material->setTexture("gMainTexture", texture);
-	return material;
+	return shader;
 }
 
 namespace ct {
@@ -115,7 +106,16 @@ ImguiRendererExtension::ImguiRendererExtension()
 // ... other extension code
 
 void ImguiRendererExtension::initialize(const Any& data) {
-  mMaterial = any_cast<HMaterial>(data);
+	auto tuple = any_cast<std::tuple<HShader, HTexture>>(data);
+	mShader = std::get<0>(tuple);
+	mTexture = std::get<1>(tuple);
+	SPtr<Technique> technique = mShader->getCore()->getCompatibleTechniques()[0];
+	SPtr<Pass> pass = technique->getPass(0);
+	pass->compile();
+	mPipeline = pass->getGraphicsPipelineState();
+	mParams = GpuParams::create(mPipeline);
+	mParams->setTexture(GPT_FRAGMENT_PROGRAM, "gMainTexture", mTexture->getCore());
+  mBuffer = gImguiParamBlockDef.createBuffer();
 }
 
 void ImguiRendererExtension::destroy() {
@@ -171,28 +171,16 @@ void ImguiRendererExtension::setupRenderState(const ct::Camera& camera,
   float viewflipYFlip =
       (gCaps().conventions.ndcYAxis == Conventions::Axis::Down) ? -1.0f : 1.0f;
 
-  if (!gBuffer) {
-    gBuffer = gImguiParamBlockDef.createBuffer();
-  }
-  gImguiParamBlockDef.gInvViewportWidth.set(gBuffer, invViewportWidth);
-  gImguiParamBlockDef.gInvViewportHeight.set(gBuffer, invViewportHeight);
-  gImguiParamBlockDef.gViewportYFlip.set(gBuffer, viewflipYFlip);
-  gBuffer->flushToGPU();
+  gImguiParamBlockDef.gInvViewportWidth.set(mBuffer, invViewportWidth);
+  gImguiParamBlockDef.gInvViewportHeight.set(mBuffer, invViewportHeight);
+  gImguiParamBlockDef.gViewportYFlip.set(mBuffer, viewflipYFlip);
+  mBuffer->flushToGPU();
 
-  UINT32 passIdx = 0;
-  UINT32 techniqueIdx = mMaterial->getDefaultTechnique();
+  auto& renderAPI = RenderAPI::instance();
 
-  SPtr<GpuParamsSet> paramSet =
-      mMaterial->getCore()->createParamsSet(techniqueIdx);
-  auto mParamBufferIdx = paramSet->getParamBlockBufferIndex("GUIParams");
-  // confirm that invalid param buffer indices are (UINT32-1)
-  assert(paramSet->getParamBlockBufferIndex("NoParamsTest") == (UINT32)-1);
-  // confirm that buffer index is valid
-  assert(mParamBufferIdx != (UINT32)-1);
-  mMaterial->getCore()->updateParamsSet(paramSet);
-  paramSet->setParamBlockBuffer(mParamBufferIdx, gBuffer, false);
-  gRendererUtility().setPass(mMaterial->getCore(), passIdx, techniqueIdx);
-  gRendererUtility().setPassParams(paramSet);
+  mParams->setParamBlockBuffer(GPT_VERTEX_PROGRAM, "GUIParams", mBuffer);
+  renderAPI.setGraphicsPipeline(mPipeline);
+  renderAPI.setGpuParams(mParams);
 }
 
 // given the imgui draw data, render out using the bsf render api immediately.

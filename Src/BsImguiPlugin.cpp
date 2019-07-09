@@ -27,8 +27,10 @@ extern "C" BS_PLUGIN_EXPORT void* loadPlugin()
 
 	ImGui::StyleColorsDark();
 
-	HMaterial imguiMaterial = defaultImguiMaterial();
-	gRendererExt = RendererExtension::create<ct::ImguiRendererExtension>(imguiMaterial);
+	HShader imguiShader = defaultImguiShader();
+	HTexture texture = createDefaultFonts();
+	std::tuple<HShader, HTexture> args = {imguiShader, texture};
+	gRendererExt = RendererExtension::create<ct::ImguiRendererExtension>(args);
 	
 	initImgui();
 

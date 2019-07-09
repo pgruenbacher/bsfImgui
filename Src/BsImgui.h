@@ -15,10 +15,14 @@ struct ImDrawData;
 namespace bs {
 
 /* 
- * generate the default imgui material with generated fontmap. Should be used as
+ * Retrieve the default imgui shader. Should be used as
  * part of the initialization of the ImguiRendererExtension
 */
-HMaterial defaultImguiMaterial() ;
+HShader defaultImguiShader();
+
+// Build default texture for fonts and symbols. Should be used as part of the
+// initialization of the ImguiRendererExtension
+HTexture createDefaultFonts();
 
 /* call demo imgui windows */
 void demoImguiUI();
@@ -27,9 +31,12 @@ namespace ct {
 
 class ImguiRendererExtension : public RendererExtension {
   Mutex mImguiRenderMutex;
-  SPtr<GpuParamBlockBuffer> gBuffer;
+  SPtr<GpuParamBlockBuffer> mBuffer;
   SPtr<VertexDeclaration> mVertexDecl;
-  HMaterial mMaterial;
+  SPtr<GpuParams> mParams;
+  SPtr<GraphicsPipelineState> mPipeline;
+  HShader mShader;
+  HTexture mTexture;
   ImDrawData mCopiedDrawData;
 
  public:
