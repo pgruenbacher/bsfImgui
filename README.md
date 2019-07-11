@@ -1,5 +1,5 @@
 
-# Bsf Imgui Plugin
+# Bsf Dear-Imgui Plugin
 
 A submodule plugin of the bsf library. It's meant to be built as a cmake
 dependency of bsf. It is meant for fast prototyping of editor features and
@@ -12,7 +12,7 @@ imgui. More thoughts can be found on this
 
 # Features
 
-* Implements [imgui](https://github.com/ocornut/imgui/) library for fast dev prototyping
+* Implements [dear-imgui](https://github.com/ocornut/imgui/) library for fast dev prototyping
 * Integrates with [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo)
   library for 3d gizmo editing of bsf scene objects.
 * Renders on core thread while the imgui interface can be built on the
