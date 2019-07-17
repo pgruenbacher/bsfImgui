@@ -125,7 +125,6 @@ bool ImguiRendererExtension::check(const ct::Camera& camera) { return true; }
 
 void ImguiRendererExtension::render(const ct::Camera& camera) {
 
-  assert(mMaterial.isLoaded());
   // lock the renderer so that when we are writing out the draw data, it is
   // not attempting to render at the same time.
   mImguiRenderMutex.lock();
